@@ -14,7 +14,6 @@ IOCPEngine::IOCPEngine() {
 }
 
 IOCPEngine::~IOCPEngine() {
-    // post poison pills
     for (DWORD i = 0; i < m_thread_count; i++)
         PostQueuedCompletionStatus(m_iocp, 0, 0, NULL);
     WaitForMultipleObjects(m_thread_count, m_threads, TRUE, INFINITE);
@@ -48,7 +47,7 @@ DWORD WINAPI IOCPEngine::worker_proc(LPVOID param) {
     while (true) {
         BOOL ok = GetQueuedCompletionStatus(
             engine->m_iocp, &bytes, &key, &ov, INFINITE);
-        if (!ok || key == 0) break;          // poison pill
+        if (!ok || key == 0) break;
         auto* item = reinterpret_cast<WorkItem*>(key);
         engine->m_callback(item->path);
         delete item;
