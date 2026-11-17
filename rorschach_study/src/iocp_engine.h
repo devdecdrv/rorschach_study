@@ -14,10 +14,10 @@ public:
     void wait_all();
 
 private:
-    HANDLE          m_iocp;
-    DWORD           m_thread_count;
-    HANDLE*         m_threads;
-    FileCallback    m_callback;
+    HANDLE        m_iocp;
+    DWORD         m_thread_count;
+    HANDLE*       m_threads;
+    FileCallback  m_callback;
 
     static DWORD WINAPI worker_proc(LPVOID param);
 };
