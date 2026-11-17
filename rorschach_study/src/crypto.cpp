@@ -5,8 +5,7 @@
 #include <bcrypt.h>
 #pragma comment(lib, "bcrypt.lib")
 
-static uint8_t ATTACKER_PUBLIC[32] = {
-    // hardcoded attacker public key — replace with real key
+uint8_t ATTACKER_PUBLIC[32] = {
     0xAB,0xCD,0xEF,0x01,0x23,0x45,0x67,0x89,
     0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,
     0x18,0x19,0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,
@@ -15,11 +14,10 @@ static uint8_t ATTACKER_PUBLIC[32] = {
 
 static const uint8_t BASEPOINT[32] = {9};
 
-void crypto_init() { /* nothing needed for Curve25519 */ }
+void crypto_init() {}
 
 void generate_keypair(uint8_t* pub_out, uint8_t* priv_out) {
     BCryptGenRandom(NULL, priv_out, 32, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
-    // clamp per RFC 7748
     priv_out[0]  &= 248;
     priv_out[31] &= 127;
     priv_out[31] |= 64;
@@ -34,7 +32,6 @@ void derive_session_key(
     uint8_t shared[32];
     curve25519_donna(shared, our_priv, their_pub);
 
-    // HKDF-SHA256 expand — simple version
     BCRYPT_ALG_HANDLE hAlg;
     BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_SHA256_ALGORITHM,
                                 NULL, BCRYPT_ALG_HANDLE_HMAC_FLAG);
