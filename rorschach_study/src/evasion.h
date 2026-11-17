@@ -1,4 +1,3 @@
-// evasion.h
 #pragma once
 
 void add_defender_exclusions();
