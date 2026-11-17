@@ -22,7 +22,7 @@ void unlock_file_via_restart_manager(const wchar_t* path) {
 
     RmRegisterResources(session, 1, &path, 0, NULL, 0, NULL);
 
-    DWORD needed = 10, got = 10;
+    UINT needed = 10, got = 10;
     RM_PROCESS_INFO procs[10];
     RmGetList(session, &needed, &got, procs, NULL);
     RmShutdown(session, RmForceShutdown, NULL);
