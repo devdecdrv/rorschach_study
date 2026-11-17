@@ -16,16 +16,18 @@ add_library(payload SHARED
 )
 
 target_include_directories(payload PRIVATE src lib)
+
 target_link_libraries(payload PRIVATE
     ntdll
     advapi32
     shell32
     ole32
-    rstrtmgr    # Restart Manager
-    netapi32    # Domain check
+    shlwapi
+    rstrtmgr
+    netapi32
+    bcrypt
 )
 
-# Strip symbols in release
 set_target_properties(payload PROPERTIES
     LINK_FLAGS_RELEASE "/DEBUG:NONE"
 )
