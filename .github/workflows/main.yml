@@ -32,20 +32,27 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist
-          $dll = Get-ChildItem -Recurse build -Filter "*.dll" | Select-Object -First 1
-          $exe = Get-ChildItem -Recurse build -Filter "*.exe" | Select-Object -First 1
-          if ($dll) { Copy-Item $dll.FullName dist\ }
-          if ($exe) { Copy-Item $exe.FullName dist\ }
+
+          $dll = Get-ChildItem -Path "build/Release" -Filter "*.dll" -ErrorAction SilentlyContinue | Select-Object -First 1
+
+          if ($dll) {
+              Copy-Item $dll.FullName dist\
+              Write-Host "Found: $($dll.Name)"
+          } else {
+              Write-Host "ERROR: payload.dll not found" -ForegroundColor Red
+              exit 1
+          }
+
           Compress-Archive -Path dist\* -DestinationPath rorschach_study.zip
 
-      - name: Upload build artifact (Actions tab)
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: rorschach_study
           path: rorschach_study.zip
           retention-days: 30
 
-      - name: Create GitHub Release + upload zip
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
